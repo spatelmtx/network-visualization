@@ -12,12 +12,11 @@ def generate_random_color():
 
 # Streamlit UI
 st.title("Network Visualization for Health and Organoleptic Effects")
-st.sidebar.header("Upload CSV")
-uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
-if uploaded_file is not None:
-    # Read data from CSV
-    data = pd.read_csv(uploaded_file)
+# Load the CSV file directly
+csv_file = "health_effect_details_with_class.csv"
+if os.path.exists(csv_file):
+    data = pd.read_csv(csv_file)
 
     # Determine the maximum or minimum correlation based on Correlation_Type
     def get_extreme_correlation(row):
@@ -37,7 +36,7 @@ if uploaded_file is not None:
                          (data["Extreme_Correlation"] == 0)]
 
     # Create a Network object for each correlation type
-    networks = defaultdict(lambda: Network(height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
+    networks = defaultdict(lambda: Network(notebook=True, height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
 
     # Define dictionaries for node attributes and information
     health_color_map = {}
@@ -66,12 +65,12 @@ if uploaded_file is not None:
                 color='green',
                 title=genus,
                 shape='circle',
-                label=''  # Ensure no label is shown
+                label=None  # Ensure no label is shown
             )
 
         # Add or update metabolite node with no label
         if metabolite not in [node['id'] for node in networks[key].nodes]:
-            title = f"Metabolite: {metabolite}\nGenus: {genus}\nCorrelation: {extreme_correlation} ({category})"
+            title = f"Metabolite:{metabolite}\nGenus: {genus}\nCorrelation: {extreme_correlation} ({category})"
             networks[key].add_node(
                 metabolite,
                 type='metabolite',
@@ -79,7 +78,7 @@ if uploaded_file is not None:
                 color='red',
                 title=title,
                 shape='box',
-                label=''  # Ensure no label is shown
+                label=None  # Ensure no label is shown
             )
         else:
             # Update existing node with new information only if necessary
@@ -105,7 +104,7 @@ if uploaded_file is not None:
                     color=health_color_map[health_effect_class],
                     title=f"{health_effect_class}\nHealth effect: {health_effect_details}",
                     shape='triangle',
-                    label=''  # Ensure no label is shown
+                    label=None  # Ensure no label is shown
                 )
             else:
                 # Update existing node with new information only if necessary
@@ -130,7 +129,7 @@ if uploaded_file is not None:
                     color=organoleptic_color_map[organoleptic_effect],
                     title=organoleptic_effect,
                     shape='star',
-                    label=''  # Ensure no label is shown
+                    label=None  # Ensure no label is shown
                 )
             if metabolite in [node['id'] for node in networks[key].nodes] and organoleptic_effect in [node['id'] for node in networks[key].nodes]:
                 networks[key].add_edge(metabolite, organoleptic_effect, color='red', width=3)
@@ -139,7 +138,7 @@ if uploaded_file is not None:
     for key, net in networks.items():
         for node in net.nodes:
             node['label'] = None
-    
+
     # Create a directory to save HTML files if it doesn't exist
     output_dir = "html_files"
     if not os.path.exists(output_dir):
@@ -163,4 +162,4 @@ if uploaded_file is not None:
             components.html(f.read(), height=800)
 
 else:
-    st.write("Please upload a CSV file to visualize the network.")
+    st.write(f"CSV file '{csv_file}' not found. Please ensure it exists in the directory.")
