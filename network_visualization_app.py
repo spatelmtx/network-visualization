@@ -1,4 +1,5 @@
 import os
+import sys
 import pandas as pd
 from pyvis.network import Network
 import random
@@ -6,9 +7,15 @@ from collections import defaultdict
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Function to generate a random color
-def generate_random_color():
-    return "#{:06x}".format(random.randint(0, 0xFFFFFF))
+# Function to suppress print statements temporarily
+class suppress_stdout:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
 
 # Streamlit UI
 st.title("Network Visualization for Health and Organoleptic Effects")
@@ -36,7 +43,8 @@ if os.path.exists(csv_file):
                          (data["Extreme_Correlation"] == 0)]
 
     # Create a Network object for each correlation type
-    networks = defaultdict(lambda: Network(notebook=True, height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
+    with suppress_stdout():
+        networks = defaultdict(lambda: Network(notebook=True, height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
 
     # Define dictionaries for node attributes and information
     health_color_map = {}
