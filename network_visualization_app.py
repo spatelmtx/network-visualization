@@ -32,7 +32,7 @@ if os.path.exists(csv_file):
         elif row['Correlation_Type'] == 'negative':
             return row[['Control', 'Obesity', 'T2D']].min()
         else:
-            return row[['Control', 'Obesity', 'T2D']].iloc[0]  # Default to control if type is neither positive nor negative
+            return row[['Control', 'Obesity', 'T2D']].iloc[0]
 
     data['Extreme_Correlation'] = data.apply(get_extreme_correlation, axis=1)
     data['Correlation_Category'] = data.apply(lambda row: ['Control', 'Obesity', 'T2D'][row[['Control', 'Obesity', 'T2D']].tolist().index(row['Extreme_Correlation'])], axis=1)
@@ -43,8 +43,7 @@ if os.path.exists(csv_file):
                          (data["Extreme_Correlation"] == 0)]
 
     # Create a Network object for each correlation type
-    with suppress_stdout():
-        networks = defaultdict(lambda: Network(notebook=True, height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
+    networks = defaultdict(lambda: Network(height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
 
     # Define dictionaries for node attributes and information
     health_color_map = {}
@@ -73,7 +72,7 @@ if os.path.exists(csv_file):
                 color='green',
                 title=genus,
                 shape='circle',
-                label=None  # Ensure no label is shown
+                label=None
             )
 
         # Add or update metabolite node with no label
@@ -86,17 +85,16 @@ if os.path.exists(csv_file):
                 color='red',
                 title=title,
                 shape='box',
-                label=None  # Ensure no label is shown
+                label=None
             )
         else:
-            # Update existing node with new information only if necessary
             existing_node = next(node for node in networks[key].nodes if node['id'] == metabolite)
             if f"Genus: {genus}" not in existing_node['title']:
                 existing_node['title'] += f"\nGenus: {genus}\nCorrelation: {extreme_correlation} ({category})"
 
         # Add edge between genus and metabolite
         edge_color = 'blue' if correlation_type == 'positive' else 'orange'
-        edge_width = max(abs(extreme_correlation) * 10, 1)  # Ensure minimum width is 1
+        edge_width = max(abs(extreme_correlation) * 10, 1)
         networks[key].add_edge(genus, metabolite, color=edge_color, width=edge_width)
 
         # Add 'Health Effect' node (Triangle shape) with no label
@@ -112,10 +110,9 @@ if os.path.exists(csv_file):
                     color=health_color_map[health_effect_class],
                     title=f"{health_effect_class}\nHealth effect: {health_effect_details}",
                     shape='triangle',
-                    label=None  # Ensure no label is shown
+                    label=None
                 )
             else:
-                # Update existing node with new information only if necessary
                 existing_node = next(node for node in networks[key].nodes if node['id'] == health_effect_class)
                 if f"Health effect: {health_effect_details}" not in existing_node['title']:
                     existing_node['title'] += f"\nHealth effect: {health_effect_details}"
@@ -137,7 +134,7 @@ if os.path.exists(csv_file):
                     color=organoleptic_color_map[organoleptic_effect],
                     title=organoleptic_effect,
                     shape='star',
-                    label=None  # Ensure no label is shown
+                    label=None
                 )
             if metabolite in [node['id'] for node in networks[key].nodes] and organoleptic_effect in [node['id'] for node in networks[key].nodes]:
                 networks[key].add_edge(metabolite, organoleptic_effect, color='red', width=3)
