@@ -12,10 +12,16 @@ def generate_random_color():
 
 # Streamlit UI
 st.title("Network Visualization for Health and Organoleptic Effects")
-st.sidebar.header("Upload CSV")
-uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
+# URL of the CSV file in the GitHub repository
+csv_url = "https://raw.githubusercontent.com/your-username/your-repository/main/health_effect_details_with_class.csv"
 
-if uploaded_file is not None:
+# Fetch the CSV file directly from GitHub
+try:
+    response = requests.get(csv_url)
+    response.raise_for_status()  # Check for HTTP errors
+    csv_content = response.content.decode('utf-8')
+    data = pd.read_csv(StringIO(csv_content))
+
     # Read data from CSV
     data = pd.read_csv(uploaded_file)
 
