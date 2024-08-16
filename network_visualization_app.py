@@ -23,7 +23,7 @@ class suppress_stdout:
 st.title("Network Visualization for Health and Organoleptic Effects")
 
 # URL of the CSV file in the GitHub repository
-csv_url = "https://github.com/spatelmtx/network-visualization/edit/main/health_effect_details_with_class.csv"
+csv_url = "https://github.com/spatelmtx/network-visualization/blob/main/health_effect_details_with_class.csv"
 
 # Fetch the CSV file directly from GitHub
 try:
