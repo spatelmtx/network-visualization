@@ -13,7 +13,7 @@ def generate_random_color():
 # Streamlit UI
 st.title("Network Visualization for Health and Organoleptic Effects")
 # URL of the CSV file in the GitHub repository
-csv_url = "https://raw.githubusercontent.com/your-username/your-repository/main/health_effect_details_with_class.csv"
+csv_url = "https://github.com/spatelmtx/network-visualization/blob/main/health_effect_details_with_class.csv"
 
 # Fetch the CSV file directly from GitHub
 try:
