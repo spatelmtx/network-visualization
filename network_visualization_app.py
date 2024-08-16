@@ -135,6 +135,11 @@ if uploaded_file is not None:
             if metabolite in [node['id'] for node in networks[key].nodes] and organoleptic_effect in [node['id'] for node in networks[key].nodes]:
                 networks[key].add_edge(metabolite, organoleptic_effect, color='red', width=3)
 
+    # Update node labels after adding nodes
+    for key, net in networks.items():
+        for node in net.nodes:
+            node['label'] = None
+    
     # Create a directory to save HTML files if it doesn't exist
     output_dir = "html_files"
     if not os.path.exists(output_dir):
