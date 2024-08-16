@@ -1,38 +1,24 @@
 import os
-import sys
 import pandas as pd
-import requests
-from io import StringIO
 from pyvis.network import Network
 import random
 from collections import defaultdict
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Function to suppress print statements temporarily
-class suppress_stdout:
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stdout = self._original_stdout
+# Function to generate a random color
+def generate_random_color():
+    return "#{:06x}".format(random.randint(0, 0xFFFFFF))
 
 # Streamlit UI
 st.title("Network Visualization for Health and Organoleptic Effects")
+st.sidebar.header("Upload CSV")
+uploaded_file = st.sidebar.file_uploader("Choose a CSV file", type="csv")
 
-# URL of the CSV file in the GitHub repository
-csv_url = "https://github.com/spatelmtx/network-visualization/blob/main/health_effect_details_with_class.csv"
+if uploaded_file is not None:
+    # Read data from CSV
+    data = pd.read_csv(uploaded_file)
 
-# Fetch the CSV file directly from GitHub
-try:
-    response = requests.get(csv_url)
-    response.raise_for_status()  # Check for HTTP errors
-    csv_content = response.content.decode('utf-8')
-    data = pd.read_csv(StringIO(csv_content))
-
-    # Continue with processing the data as before
     # Determine the maximum or minimum correlation based on Correlation_Type
     def get_extreme_correlation(row):
         if row['Correlation_Type'] == 'positive':
@@ -51,8 +37,7 @@ try:
                          (data["Extreme_Correlation"] == 0)]
 
     # Create a Network object for each correlation type
-    with suppress_stdout():
-        networks = defaultdict(lambda: Network(notebook=True, height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
+    networks = defaultdict(lambda: Network(height='800px', width='100%', bgcolor='#ffffff', font_color='black'))
 
     # Define dictionaries for node attributes and information
     health_color_map = {}
@@ -81,12 +66,12 @@ try:
                 color='green',
                 title=genus,
                 shape='circle',
-                label=None  # Ensure no label is shown
+                label=''  # Ensure no label is shown
             )
 
         # Add or update metabolite node with no label
         if metabolite not in [node['id'] for node in networks[key].nodes]:
-            title = f"Metabolite:{metabolite}\nGenus: {genus}\nCorrelation: {extreme_correlation} ({category})"
+            title = f"Metabolite: {metabolite}\nGenus: {genus}\nCorrelation: {extreme_correlation} ({category})"
             networks[key].add_node(
                 metabolite,
                 type='metabolite',
@@ -94,7 +79,7 @@ try:
                 color='red',
                 title=title,
                 shape='box',
-                label=None  # Ensure no label is shown
+                label=''  # Ensure no label is shown
             )
         else:
             # Update existing node with new information only if necessary
@@ -120,7 +105,7 @@ try:
                     color=health_color_map[health_effect_class],
                     title=f"{health_effect_class}\nHealth effect: {health_effect_details}",
                     shape='triangle',
-                    label=None  # Ensure no label is shown
+                    label=''  # Ensure no label is shown
                 )
             else:
                 # Update existing node with new information only if necessary
@@ -145,7 +130,7 @@ try:
                     color=organoleptic_color_map[organoleptic_effect],
                     title=organoleptic_effect,
                     shape='star',
-                    label=None  # Ensure no label is shown
+                    label=''  # Ensure no label is shown
                 )
             if metabolite in [node['id'] for node in networks[key].nodes] and organoleptic_effect in [node['id'] for node in networks[key].nodes]:
                 networks[key].add_edge(metabolite, organoleptic_effect, color='red', width=3)
@@ -154,7 +139,7 @@ try:
     for key, net in networks.items():
         for node in net.nodes:
             node['label'] = None
-
+    
     # Create a directory to save HTML files if it doesn't exist
     output_dir = "html_files"
     if not os.path.exists(output_dir):
@@ -177,5 +162,5 @@ try:
         with open(file_path, 'r', encoding='utf-8') as f:
             components.html(f.read(), height=800)
 
-except requests.exceptions.RequestException as e:
-    st.write(f"Error fetching the CSV file from GitHub: {e}")
+else:
+    st.write("Please upload a CSV file to visualize the network.")
