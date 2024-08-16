@@ -167,6 +167,3 @@ try:
         st.write(f"### {selected_graph.replace('_', ' ').title()}")
         with open(file_path, 'r', encoding='utf-8') as f:
             components.html(f.read(), height=800)
-
-else:
-    st.write("Please upload a CSV file to visualize the network.")
